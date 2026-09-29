@@ -168,26 +168,23 @@
       var pre=document.querySelector(
         `.preloader`
       );
-      function preGone(){
-        if(!pre){ return true; }
-        var st=getComputedStyle(pre);
-        if(st.display===`none`){ return true; }
-        if(st.visibility===`hidden`){
-          return true;
-        }
-        if(parseFloat(st.opacity)<0.02){
-          return true;
-        }
-        return false;
+      var seen=false;
+      var t0=Date.now();
+      function go(){
+        clearInterval(wait);
+        setTimeout(showLogo,REVEAL_DELAY);
       }
       var wait=setInterval(function(){
-        if(preGone()){
-          clearInterval(wait);
-          setTimeout(
-            showLogo,REVEAL_DELAY
-          );
+        if(!pre){ go(); return; }
+        var d=getComputedStyle(pre).display;
+        if(d!==`none`){
+          seen=true;
+        }else if(seen){
+          go();
+        }else if(Date.now()-t0>3000){
+          go();
         }
-      },80);
+      },60);
       setTimeout(function(){
         if(!shown){ showLogo(); }
       },12000);
