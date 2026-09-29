@@ -87,7 +87,7 @@
     var FADE_END=0.7;
     var MAX_BLUR=16;
     var INTRO_MS=900;
-    var REVEAL_DELAY=500;
+    var REVEAL_DELAY=400;
     var origLogo=document.querySelector(
       `.white-nav-jf`
     );
