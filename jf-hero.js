@@ -35,7 +35,9 @@
       +`display:none !important;}`
       +`#jf-menu{position:fixed !important;`
       +`inset:0 !important;`
+      +`width:100% !important;`
       +`display:flex !important;`
+      +`align-items:stretch !important;`
       +`opacity:0;pointer-events:none;`
       +`filter:blur(`+B+`px);`
       +`transition:opacity `+MS+`ms ease,`
