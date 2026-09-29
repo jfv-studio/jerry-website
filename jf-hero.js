@@ -13,36 +13,45 @@
     menuDone=true;
     var B=12, MS=500;
     var st=document.createElement(`style`);
-    st.textContent=`.nav-menu-2{`
+    st.textContent=
+      `.w-nav-overlay{display:block !important;`
+      +`overflow:visible !important;`
+      +`pointer-events:none !important;}`
+      +`.nav-menu-2.full-screen{`
+      +`display:flex !important;`
       +`transform:none !important;`
+      +`opacity:0;pointer-events:none;`
       +`transition:opacity `+MS+`ms ease,`
       +`filter `+MS+`ms ease !important;}`
       +`.nav-title.fullscreen.right:hover{`
       +`color:var(--primary-blue);}`;
     document.head.appendChild(st);
     function isOpen(){
+      if(menu.hasAttribute(`data-nav-menu-open`)){
+        return true;
+      }
       if(navbar.querySelector(
         `.w-nav-button.w--open`
       )){ return true; }
-      var ov=navbar.querySelector(
-        `.w-nav-overlay`
-      );
-      if(ov&&getComputedStyle(ov).display
-        !==`none`){ return true; }
       return false;
     }
     function apply(){
       var o=isOpen();
       menu.style.opacity=o?`1`:`0`;
+      menu.style.pointerEvents=o?`auto`:`none`;
       menu.style.filter=o
         ?`blur(0px)`
         :`blur(`+B+`px)`;
     }
     var mo=new MutationObserver(apply);
+    mo.observe(menu,{
+      attributes:true,
+      attributeFilter:[`data-nav-menu-open`]
+    });
     mo.observe(navbar,{
       attributes:true,
       subtree:true,
-      attributeFilter:[`class`,`style`]
+      attributeFilter:[`class`,`data-nav-menu-open`]
     });
     apply();
   }
