@@ -15,11 +15,16 @@
     var clone=orig.cloneNode(true);
     clone.id=`jf-menu`;
     clone.removeAttribute(`data-w-id`);
-    clone.removeAttribute(`data-nav-menu-open`);
     [].forEach.call(
       clone.querySelectorAll(`[data-w-id]`),
-      function(el){
-        el.removeAttribute(`data-w-id`);
+      function(el){ el.removeAttribute(`data-w-id`); }
+    );
+    [].forEach.call(
+      clone.querySelectorAll(`.w-nav-button`),
+      function(b){
+        if(b.parentNode){
+          b.parentNode.removeChild(b);
+        }
       }
     );
     document.body.appendChild(clone);
@@ -38,42 +43,30 @@
       +`.nav-title.fullscreen.right:hover{`
       +`color:var(--primary-blue);}`;
     document.head.appendChild(st);
-    function isOpen(){
-      if(orig.hasAttribute(
-        `data-nav-menu-open`
-      )){ return true; }
-      if(navbar.querySelector(
-        `.w-nav-button.w--open`
-      )){ return true; }
-      return false;
+    function openM(){
+      clone.style.opacity=`1`;
+      clone.style.pointerEvents=`auto`;
+      clone.style.filter=`blur(0px)`;
     }
-    function apply(){
-      var o=isOpen();
-      clone.style.opacity=o?`1`:`0`;
-      clone.style.pointerEvents=o
-        ?`auto`:`none`;
-      clone.style.filter=o
-        ?`blur(0px)`
-        :`blur(`+B+`px)`;
+    function closeM(){
+      clone.style.opacity=`0`;
+      clone.style.pointerEvents=`none`;
+      clone.style.filter=`blur(`+B+`px)`;
     }
-    var mo=new MutationObserver(apply);
-    mo.observe(orig,{
-      attributes:true,
-      attributeFilter:[`data-nav-menu-open`]
-    });
-    mo.observe(navbar,{
-      attributes:true,
-      subtree:true,
-      attributeFilter:[`class`,`data-nav-menu-open`]
-    });
-    var closeBtn=navbar.querySelector(
-      `.w-nav-button.close-button`
-    )||navbar.querySelector(`.w-nav-button`);
+    [].forEach.call(
+      document.querySelectorAll(`.open-button`),
+      function(b){ b.addEventListener(`click`,openM); }
+    );
+    [].forEach.call(
+      document.querySelectorAll(`.close-button`),
+      function(b){ b.addEventListener(`click`,closeM); }
+    );
     clone.addEventListener(`click`,function(e){
-      if(e.target.closest(`a`)) return;
-      if(closeBtn){ closeBtn.click(); }
+      if(!e.target.closest(`a`)){ closeM(); }
     });
-    apply();
+    document.addEventListener(`keydown`,function(e){
+      if(e.key===`Escape`){ closeM(); }
+    });
   }
   function boot(){
     if(started) return;
