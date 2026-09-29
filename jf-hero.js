@@ -6,43 +6,34 @@
   var menuDone=false;
   function initMenu(){
     if(menuDone) return;
-    var navbar=document.querySelector(`.navbar-2`)
-      ||document.querySelector(`.w-nav`);
-    var menu=document.querySelector(`.nav-menu-2`);
-    if(!navbar||!menu) return;
+    if(!document.querySelector(`.nav-menu-2`)){
+      return;
+    }
     menuDone=true;
-    var MENU_BLUR=12;
-    var MENU_MS=500;
-    var st=document.createElement(`style`);
-    st.textContent=`.nav-menu-2{`
+    var B=12, MS=500;
+    var rules=
+      `.w-nav-overlay{display:block !important;`
+      +`overflow:visible !important;`
+      +`pointer-events:none !important;}`
+      +`[data-nav-menu-open] .w-nav-overlay{`
+      +`pointer-events:auto !important;}`
+      +`.nav-menu-2.full-screen{`
       +`transform:none !important;`
-      +`transition:opacity `+MENU_MS+`ms ease,`
-      +`filter `+MENU_MS+`ms ease !important;}`;
+      +`transition:opacity `+MS+`ms ease,`
+      +`filter `+MS+`ms ease !important;`
+      +`opacity:0 !important;`
+      +`filter:blur(`+B+`px) !important;`
+      +`pointer-events:none !important;}`
+      +`[data-nav-menu-open] `
+      +`.nav-menu-2.full-screen{`
+      +`opacity:1 !important;`
+      +`filter:blur(0px) !important;`
+      +`pointer-events:auto !important;}`
+      +`.nav-title.fullscreen.right:hover{`
+      +`color:var(--primary-blue);}`;
+    var st=document.createElement(`style`);
+    st.textContent=rules;
     document.head.appendChild(st);
-    function isOpen(){
-      if(navbar.querySelector(`.w-nav-button.w--open`)){
-        return true;
-      }
-      var ov=navbar.querySelector(`.w-nav-overlay`);
-      if(ov&&getComputedStyle(ov).display!==`none`){
-        return true;
-      }
-      return false;
-    }
-    function apply(){
-      var o=isOpen();
-      menu.style.opacity=o?`1`:`0`;
-      menu.style.filter=o
-        ?`blur(0px)`
-        :`blur(`+MENU_BLUR+`px)`;
-    }
-    var mo=new MutationObserver(apply);
-    mo.observe(navbar,{
-      attributes:true,
-      subtree:true,
-      attributeFilter:[`class`,`style`]
-    });
-    apply();
   }
   function boot(){
     if(started) return;
