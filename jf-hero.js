@@ -175,7 +175,6 @@
         if(st.visibility===`hidden`){
           return true;
         }
-        if(!pre.offsetParent){ return true; }
         if(parseFloat(st.opacity)<0.02){
           return true;
         }
