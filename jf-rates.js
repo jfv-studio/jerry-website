@@ -69,6 +69,17 @@
   @media (max-width:900px){#jf-rates .tiers{grid-template-columns:repeat(2,1fr);} #jf-rates .tiers:hover .tier:not(:hover){filter:none;opacity:1;}}
   @media (max-width:820px){#jf-rates .builder{grid-template-columns:1fr;} #jf-rates .estimate{position:static;} #jf-rates .fine{columns:1;}}
   @media (max-width:520px){#jf-rates .tiers{grid-template-columns:1fr;}}
+  #jf-rates .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  #jf-rates .step{border-top:1px solid var(--line);padding-top:16px;}
+  #jf-rates .step .n{font-family:var(--ui);font-size:10px;letter-spacing:.24em;color:var(--red);}
+  #jf-rates .step .sh{font-family:var(--display);font-weight:700;font-size:18px;margin:9px 0 7px;}
+  #jf-rates .step p{font-size:13.5px;line-height:1.5;color:rgba(242,240,236,.74);margin:0;}
+  #jf-rates .cta{margin-top:58px;border-top:1px solid var(--faint);padding-top:30px;display:flex;justify-content:space-between;align-items:flex-end;gap:28px;flex-wrap:wrap;}
+  #jf-rates .cta h3{font-family:var(--display);font-weight:700;font-size:clamp(26px,3.2vw,44px);line-height:1.02;margin:0;max-width:16ch;}
+  #jf-rates .cta .c-r{font-family:var(--serif);font-size:15px;line-height:1.5;color:rgba(242,240,236,.8);max-width:34ch;}
+  #jf-rates .cta .c-r a{font-family:var(--ui);letter-spacing:.04em;display:inline-block;margin-top:8px;}
+  @media (max-width:820px){#jf-rates .steps{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){#jf-rates .steps{grid-template-columns:1fr;}}
   @media (prefers-reduced-motion: reduce){#jf-rates *{transition-duration:.001ms !important;}}
   `;
 
@@ -126,6 +137,19 @@
       <p><b>Licensing</b>A percentage of the creative fee, not materials. Extended commercial covers magazines, print &amp; digital advertising and competitions; each additional party adds 25%.</p>
       <p><b>Expenses &amp; equipment</b>Film (~£25/roll 120, ~£15/roll 35mm) and processing (£35–£56/roll) billed at cost. Specialist lens or lighting rental quoted separately when a brief needs it.</p>
       <p><b>Events &amp; documentary</b>Quoted separately — from £500 half day, £720 full day. Enquire at <a href="mailto:studio@jerryflorez.com">studio@jerryflorez.com</a>.</p>
+    </div>
+
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><div class="sh">Enquiry &amp; brief</div><p>Tell me about the building and what it needs to say.</p></div>
+      <div class="step"><div class="n">02</div><div class="sh">Site visit</div><p>An unhurried hour on site to walk through and plan the shots.</p></div>
+      <div class="step"><div class="n">03</div><div class="sh">Shoot day</div><p>Natural light and analogue film, working at the building's pace.</p></div>
+      <div class="step"><div class="n">04</div><div class="sh">Delivery</div><p>Edited images within three weeks — sooner when a brief needs it.</p></div>
+    </div>
+
+    <div class="cta">
+      <h3>Let's photograph your building.</h3>
+      <div class="c-r">Tell me about the project and we'll find the right fit — a coffee is always welcome.<a href="mailto:studio@jerryflorez.com">studio@jerryflorez.com</a></div>
     </div>
   </div>`;
 
