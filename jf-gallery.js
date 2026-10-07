@@ -126,7 +126,7 @@
     if(p.url) inner.setAttribute('aria-label',p.name);
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading='eager';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
-    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.90+norm*0.20,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
+    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.86+norm*0.34,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;schedule();});
@@ -145,12 +145,16 @@
   function layout(){
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight;
     var rng=mulberry32(SEED), MAXO=0.05, placed=[], y=sh*0.33, maxB=0;
-    figs.forEach(function(f,i){
-      var n=f.norm, wFrac=0.40+n*0.30, back=(n<0.38&&rng()<0.5); if(back)wFrac*=0.70;
+    /* interleave placement order big/small so no screen gets a clump of big images */
+    var byImp=figs.map(function(f,i){return i;}).sort(function(a,b){return figs[b].norm-figs[a].norm;});
+    var seq=[], lo=0, hi=byImp.length-1;
+    while(lo<=hi){ seq.push(byImp[lo++]); if(lo<=hi) seq.push(byImp[hi--]); }
+    seq.forEach(function(fi,pos){
+      var f=figs[fi], n=f.norm, wFrac=0.40+n*0.30, back=(n<0.38&&rng()<0.5); if(back)wFrac*=0.70;
       var w=clamp(wFrac*sw,sw*0.22,sw*0.80), h=w/f.aspect, yy=y, bestX=0, bestOv=1e9;
-      /* keep even vertical spacing (no y-pushing = no gaps); pick the least-overlapping X */
+      /* even vertical pitch (no gaps); pick the least-overlapping X */
       for(var tries=0;tries<24;tries++){
-        var xFrac=back?0.14+rng()*0.58:(i%2===0?rng()*0.30:0.52+rng()*0.34);
+        var xFrac=back?0.14+rng()*0.58:(pos%2===0?rng()*0.30:0.52+rng()*0.34);
         var x=clamp(xFrac*(sw-w),0,sw-w), mo=0;
         for(var k=0;k<placed.length;k++){var r=placed[k];
           var ix=Math.max(0,Math.min(x+w,r.x+r.w)-Math.max(x,r.x)), iy=Math.max(0,Math.min(yy+h,r.y+r.h)-Math.max(yy,r.y));
