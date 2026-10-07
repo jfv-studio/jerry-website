@@ -144,7 +144,7 @@
 
   function layout(){
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight;
-    var rng=mulberry32(SEED), MAXO=0.10, placed=[], y=sh*0.26, maxB=0;
+    var rng=mulberry32(SEED), MAXO=0.05, placed=[], y=sh*0.26, maxB=0;
     figs.forEach(function(f,i){
       var n=f.norm, wFrac=0.40+n*0.30, back=(n<0.38&&rng()<0.5); if(back)wFrac*=0.70;
       var w=clamp(wFrac*sw,sw*0.22,sw*0.80), h=w/f.aspect, x=0, yy=y, ok=false, tries=0;
@@ -159,7 +159,7 @@
       f.w=w;f.h=h;f.x=x;f.y=yy; placed.push({x:x,y:yy,w:w,h:h});
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
       f.fig.style.zIndex=back?1+Math.round(n*18):20+Math.round(n*80);
-      y=yy+h*(0.5+rng()*0.26)+sh*0.04; maxB=Math.max(maxB,yy+h);
+      y=yy+h*(0.92+rng()*0.4)+sh*0.07; maxB=Math.max(maxB,yy+h);
     });
     var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
     track.style.height=(need+sh*1.7)+'px';
