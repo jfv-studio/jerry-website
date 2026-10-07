@@ -15,8 +15,8 @@
     --serif:"Averia Serif Libre",Georgia,serif;
     --ease:cubic-bezier(.16,.84,.44,1);
     background:var(--bg);color:var(--ink);font-family:var(--serif);font-weight:300;line-height:1.55;
-    padding:7vh 6vw 9vh;-webkit-font-smoothing:antialiased;}
-  #jf-rates *{box-sizing:border-box;}
+    padding:7vh 6vw 9vh;max-width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  #jf-rates,#jf-rates *{box-sizing:border-box;}
   #jf-rates .jfr-wrap{max-width:1040px;margin:0 auto;}
   #jf-rates a{color:var(--red);text-decoration:none;}
   #jf-rates .eyebrow{font-family:var(--ui);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--mute);margin:0;}
@@ -68,7 +68,7 @@
   #jf-rates .fine b{font-family:var(--ui);font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:3px;}
   @media (max-width:900px){#jf-rates .tiers{grid-template-columns:repeat(2,1fr);} #jf-rates .tiers:hover .tier:not(:hover){filter:none;opacity:1;}}
   @media (max-width:820px){#jf-rates .builder{grid-template-columns:1fr;} #jf-rates .estimate{position:static;} #jf-rates .fine{columns:1;}}
-  @media (max-width:520px){#jf-rates .tiers{grid-template-columns:1fr;}}
+  @media (max-width:520px){#jf-rates .tiers{grid-template-columns:1fr;} #jf-rates select{min-width:0;max-width:56vw;} #jf-rates .row{gap:10px;}}
   #jf-rates .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   #jf-rates .step{border-top:1px solid var(--line);padding-top:16px;}
   #jf-rates .step .n{font-family:var(--ui);font-size:10px;letter-spacing:.24em;color:var(--red);}
