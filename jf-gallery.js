@@ -16,8 +16,9 @@
     var bad=function(u){return !u||u.indexOf('data:')===0||u.indexOf('placeholder')>=0||u.indexOf('/plugins/')>=0;};
     if(!bad(s)) return s;
     var bg=(img.style&&img.style.backgroundImage)||'';
-    var m=bg.match(/url\(["']?(.*?)["']?\)/);
-    if(m&&m[1]&&m[1]!=='none'&&!bad(m[1])) return m[1];
+    var m=bg.match(/url\((["'])(.*?)\1\)/)||bg.match(/url\(([^)]+)\)/);
+    var u=(m?(m[2]||m[1]):'').replace(/^["']|["']$/g,'');
+    if(u&&u!=='none'&&!bad(u)) return u;
     var ds=img.getAttribute('data-src'); if(ds&&!bad(ds)) return ds;
     var ss=img.getAttribute('srcset'); if(ss){var f=ss.split(',')[0].trim().split(' ')[0]; if(f&&!bad(f)) return f;}
     return '';
@@ -72,7 +73,7 @@
   #jf-gallery .jfg-name{font-family:var(--display);font-weight:700;font-size:clamp(24px,2.7vw,42px);line-height:1.03;letter-spacing:.004em;}
   #jf-gallery .jfg-meta{margin-top:11px;font-family:var(--ui);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);}
   #jf-gallery .jfg-desc{margin-top:13px;font-family:var(--serif);font-weight:300;font-size:16px;line-height:1.5;color:rgba(242,240,236,.78);max-width:33ch;}
-  #jf-gallery .jfg-stage{flex:1;height:100%;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:thin;scrollbar-color:var(--faint) transparent;}
+  #jf-gallery .jfg-stage{flex:1;height:100%;overflow:hidden;position:relative;}
   #jf-gallery .jfg-stage.gallery{overflow:hidden;}
   #jf-gallery .jfg-stage.gallery .jfg-fig{transition:filter .5s var(--ease),opacity .5s var(--ease);}
   #jf-gallery .jfg-stage::-webkit-scrollbar{width:7px;} #jf-gallery .jfg-stage::-webkit-scrollbar-thumb{background:var(--faint);border-radius:4px;}
@@ -124,7 +125,7 @@
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading=i<5?'eager':'lazy';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
     var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.82+norm*0.46,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,locked:false};
-    img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();schedule();} else {layoutGallery();paintGallery();} });
+    img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;schedule();});
     return F;
@@ -223,18 +224,25 @@
   function setMode(m){
     mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery':'Contact sheet';
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();} else {layout();schedule();}
+    sizePin();
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
 
-  stage.addEventListener('scroll',schedule,{passive:true});
-  root.addEventListener('wheel',function(e){
-    if(mode!=='scroll')return;
-    var ih=window.innerHeight||document.documentElement.clientHeight, rc=root.getBoundingClientRect();
-    if(rc.top>1 || rc.bottom<ih-1) return;   /* not fully in view — let the page scroll it into place */
-    var atTop=stage.scrollTop<=0&&e.deltaY<0, atBot=stage.scrollTop>=stage.scrollHeight-stage.clientHeight-1&&e.deltaY>0;
-    if(atTop||atBot) return;                 /* release to the page at the ends */
-    stage.scrollTop+=e.deltaY; e.preventDefault();
-  },{passive:false});
-  window.addEventListener('resize',function(){ mode==='scroll'?(layout(),schedule()):(layoutGallery(),paintGallery()); });
-  layout(); schedule();
+  /* ---- pinned scroll: the section locks to the top, then page-scroll drives the gallery,
+     then it releases to reveal the next section (footer) ---- */
+  var wrap=document.createElement('div'); wrap.className='jfg-pin';
+  root.parentNode.insertBefore(wrap,root); wrap.appendChild(root);
+  root.style.position='sticky'; root.style.top='0';
+  function internalMax(){ return Math.max(0, track.offsetHeight - stage.clientHeight); }
+  function sizePin(){ wrap.style.height = (mode==='scroll') ? (stage.clientHeight + internalMax())+'px' : ''; }
+  function onPageScroll(){
+    if(mode!=='scroll') return;
+    var im=internalMax(); if(im<1){schedule();return;}
+    var top=wrap.getBoundingClientRect().top;
+    stage.scrollTop=clamp(-top,0,im);
+    schedule();
+  }
+  window.addEventListener('scroll',onPageScroll,{passive:true});
+  window.addEventListener('resize',function(){ if(mode==='scroll'){layout();} else {layoutGallery();} sizePin(); (mode==='scroll'?schedule():paintGallery()); });
+  layout(); sizePin(); schedule();
 })();
