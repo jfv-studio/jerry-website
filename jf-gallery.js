@@ -144,21 +144,23 @@
 
   function layout(){
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight;
-    var rng=mulberry32(SEED), MAXO=0.05, placed=[], y=sh*0.26, maxB=0;
+    var rng=mulberry32(SEED), MAXO=0.05, placed=[], y=sh*0.33, maxB=0;
     figs.forEach(function(f,i){
       var n=f.norm, wFrac=0.40+n*0.30, back=(n<0.38&&rng()<0.5); if(back)wFrac*=0.70;
-      var w=clamp(wFrac*sw,sw*0.22,sw*0.80), h=w/f.aspect, x=0, yy=y, ok=false, tries=0;
-      while(!ok&&tries<16){
-        var xFrac=back?0.18+rng()*0.5:(i%2===0?rng()*0.28:0.56+rng()*0.32);
-        x=clamp(xFrac*(sw-w),0,sw-w); ok=true;
+      var w=clamp(wFrac*sw,sw*0.22,sw*0.80), h=w/f.aspect, yy=y, bestX=0, bestOv=1e9;
+      /* keep even vertical spacing (no y-pushing = no gaps); pick the least-overlapping X */
+      for(var tries=0;tries<24;tries++){
+        var xFrac=back?0.14+rng()*0.58:(i%2===0?rng()*0.30:0.52+rng()*0.34);
+        var x=clamp(xFrac*(sw-w),0,sw-w), mo=0;
         for(var k=0;k<placed.length;k++){var r=placed[k];
           var ix=Math.max(0,Math.min(x+w,r.x+r.w)-Math.max(x,r.x)), iy=Math.max(0,Math.min(yy+h,r.y+r.h)-Math.max(yy,r.y));
-          if(ix*iy/Math.min(w*h,r.w*r.h)>MAXO){ok=false;break;}}
-        if(!ok){yy+=sh*0.05;tries++;}
+          var ov=ix*iy/Math.min(w*h,r.w*r.h); if(ov>mo)mo=ov;
+        }
+        if(mo<bestOv){bestOv=mo;bestX=x;}
+        if(mo<=MAXO) break;
       }
-      f.w=w;f.h=h;f.x=x;f.y=yy; placed.push({x:x,y:yy,w:w,h:h});
-      f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
-      f.fig.style.zIndex=back?1+Math.round(n*18):20+Math.round(n*80);
+      f.w=w;f.h=h;f.x=bestX;f.y=yy; placed.push({x:bestX,y:yy,w:w,h:h});
+      f.fig.style.width=w+'px';f.fig.style.left=bestX+'px';f.fig.style.top=yy+'px';
       y=yy+h*(0.92+rng()*0.4)+sh*0.07; maxB=Math.max(maxB,yy+h);
     });
     var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
@@ -196,10 +198,12 @@
       f.fig.style.transform='translateY('+(reduce?0:scroll*(1-f.speed)).toFixed(1)+'px)';
       f.fig.style.filter='blur('+blur.toFixed(2)+'px)';
       f.fig.style.opacity=op.toFixed(3);
+      /* whatever is nearest the centreline rises to the top so it is never buried */
+      f.fig.style.zIndex = f.locked ? 1 : Math.round((1-d)*500 + f.norm*40 + (forced?600:0));
       if(!f.locked){var s=forced?-1:d; if(s<bestScore){bestScore=s;best=i;}}
     });
     closer.style.opacity=endP.toFixed(3); closer.style.filter='blur('+((1-endP)*10).toFixed(1)+'px)';
-    var emergeIn=reduce?1:clamp(scroll/(sr.height*0.55),0,1);
+    var emergeIn=reduce?1:clamp(scroll/(sr.height*0.12),0,1);
     var railA=reduce?1:emergeIn*(1-endP);                 /* emerge at start, submerge at end */
     rail.style.opacity=railA.toFixed(3); rail.style.filter='blur('+((1-railA)*8).toFixed(1)+'px)';
     if(best>=0&&endP<0.5) setFocus(DATA.projects[best]);
