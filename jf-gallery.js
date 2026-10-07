@@ -16,7 +16,8 @@
     if(!nodes.length) return null;
     var projects=[], cats={};
     [].forEach.call(nodes,function(n){
-      var img=n.querySelector('img'), src=n.getAttribute('data-img')||(img&&(img.currentSrc||img.src));
+      var src=n.getAttribute('data-img')||'';
+      if(!src){var ii=n.querySelectorAll('img');for(var q=0;q<ii.length;q++){var s=ii[q].currentSrc||ii[q].getAttribute('src')||ii[q].src;if(s&&s.indexOf('data:')!==0){src=s;break;}}}
       if(!src) return;
       var cs=(n.getAttribute('data-cats')||'').replace(/ \/ /g,'/').split(',').map(function(s){return s.trim();}).filter(Boolean);
       cs.forEach(function(c){cats[c]=1;});
@@ -217,6 +218,8 @@
   stage.addEventListener('scroll',schedule,{passive:true});
   root.addEventListener('wheel',function(e){
     if(mode!=='scroll')return;
+    var ih=window.innerHeight||document.documentElement.clientHeight, rc=root.getBoundingClientRect();
+    if(rc.top>1 || rc.bottom<ih-1) return;   /* not fully in view — let the page scroll it into place */
     var atTop=stage.scrollTop<=0&&e.deltaY<0, atBot=stage.scrollTop>=stage.scrollHeight-stage.clientHeight-1&&e.deltaY>0;
     if(atTop||atBot) return;                 /* release to the page at the ends */
     stage.scrollTop+=e.deltaY; e.preventDefault();
