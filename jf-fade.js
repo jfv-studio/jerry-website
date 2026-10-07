@@ -4,7 +4,7 @@
    matching the front-gallery / nav blur language. Catches Finsweet-cloned slides too. */
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var SEL = '.lightbox-image, .collection-list-slide-image, .w-slide img';
+  var SEL = '.lightbox-collection-item img, .lightbox-image, .collection-list-slide-image, .w-slide img, .related-projects';
   var MS = 800, BLUR = 14;   /* fade duration (ms) and start blur (px) */
 
   function reveal(img){ img.style.opacity='1'; img.style.filter='blur(0px)'; }
