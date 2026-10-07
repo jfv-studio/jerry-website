@@ -129,7 +129,7 @@
     var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.86+norm*0.34,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
-    fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;schedule();});
+    fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;if(mode==='gallery')clearFocus();schedule();});
     return F;
   });
 
@@ -225,6 +225,7 @@
   function refresh(){ mode==='scroll'?schedule():paintGallery(); }
 
   var cur='',swapping=false,pendName='';
+  function clearFocus(){cur='';swapping=false;pName.textContent='';pMeta.textContent='';pDesc.textContent='';block.style.opacity='1';block.style.filter='none';}
   function paint(p){pName.textContent=p.name;pMeta.textContent=(p.client?p.client+' · ':'')+p.cats.join(' / ');pDesc.textContent=p.bite;}
   function setFocus(p){
     if(p.name===cur||(swapping&&p.name===pendName))return;
@@ -236,7 +237,7 @@
 
   function setMode(m){
     mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery':'Contact sheet';
-    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';} else {layout();schedule();}
+    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();} else {layout();schedule();}
     sizePin();
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
