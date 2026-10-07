@@ -20,11 +20,11 @@
   #jf-rates .jfr-wrap{max-width:1040px;margin:0 auto;}
   #jf-rates a{color:var(--red);text-decoration:none;}
   #jf-rates .eyebrow{font-family:var(--ui);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--mute);margin:0;}
-  #jf-rates h1{font-family:var(--display);font-weight:700;font-size:clamp(40px,7vw,86px);line-height:.96;letter-spacing:.01em;margin:16px 0 0;}
+  #jf-rates h1{font-family:var(--display);font-weight:700;font-size:clamp(40px,7vw,86px) !important;line-height:.96 !important;letter-spacing:.01em;margin:16px 0 0;}
   #jf-rates .statement{font-family:var(--serif);font-size:clamp(18px,1.9vw,24px);line-height:1.45;color:var(--ink);max-width:40ch;margin:26px 0 0;}
   #jf-rates .statement em{font-style:italic;color:#fff;}
   #jf-rates .lede{font-size:15px;color:var(--mute);max-width:58ch;margin:20px 0 0;}
-  #jf-rates h2{font-family:var(--ui);font-size:12px;line-height:1.4;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);margin:56px 0 20px;font-weight:400;}
+  #jf-rates h2{font-family:var(--ui);font-size:12px !important;line-height:1.4 !important;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);margin:56px 0 20px;font-weight:400 !important;}
   #jf-rates .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
   #jf-rates .tier{background:var(--panel);border:1px solid var(--line);padding:22px 20px;cursor:pointer;display:flex;flex-direction:column;
     transition:border-color .5s var(--ease),filter .5s var(--ease),opacity .5s var(--ease);}
