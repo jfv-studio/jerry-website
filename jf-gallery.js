@@ -236,7 +236,7 @@
 
   function setMode(m){
     mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery':'Contact sheet';
-    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();} else {layout();schedule();}
+    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';} else {layout();schedule();}
     sizePin();
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
@@ -247,7 +247,10 @@
   root.parentNode.insertBefore(wrap,root); wrap.appendChild(root);
   root.style.position='sticky'; root.style.top='0';
   function internalMax(){ return Math.max(0, track.offsetHeight - stage.clientHeight); }
-  function sizePin(){ wrap.style.height = (mode==='scroll') ? (stage.clientHeight + internalMax())+'px' : ''; }
+  var pinH=0;
+  /* keep the pin geometry constant across modes so switching to Contact sheet
+     doesn't collapse the pin (which let the whole section scroll away) */
+  function sizePin(){ if(mode==='scroll'){ pinH=stage.clientHeight+internalMax(); } wrap.style.height=(pinH||stage.clientHeight)+'px'; }
   function onPageScroll(){
     if(mode!=='scroll') return;
     var im=internalMax(); if(im<1){schedule();return;}
