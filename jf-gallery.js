@@ -126,7 +126,7 @@
     if(p.url) inner.setAttribute('aria-label',p.name);
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading='eager';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
-    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.82+norm*0.46,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,locked:false};
+    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.90+norm*0.20,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;schedule();});
@@ -161,7 +161,7 @@
       }
       f.w=w;f.h=h;f.x=bestX;f.y=yy; placed.push({x:bestX,y:yy,w:w,h:h});
       f.fig.style.width=w+'px';f.fig.style.left=bestX+'px';f.fig.style.top=yy+'px';
-      y=yy+h*(0.92+rng()*0.4)+sh*0.07; maxB=Math.max(maxB,yy+h);
+      y=yy+ sh*0.42 + h*0.16 + rng()*sh*0.12; maxB=Math.max(maxB,yy+h);
     });
     var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
     track.style.height=(need+sh*1.7)+'px';
@@ -199,7 +199,7 @@
       f.fig.style.filter='blur('+blur.toFixed(2)+'px)';
       f.fig.style.opacity=op.toFixed(3);
       /* whatever is nearest the centreline rises to the top so it is never buried */
-      f.fig.style.zIndex = f.locked ? 1 : Math.round((1-d)*500 + f.norm*40 + (forced?600:0));
+      f.fig.style.zIndex = f.locked ? 1 : (forced ? 600 : f.baseZ);
       if(!f.locked){var s=forced?-1:d; if(s<bestScore){bestScore=s;best=i;}}
     });
     closer.style.opacity=endP.toFixed(3); closer.style.filter='blur('+((1-endP)*10).toFixed(1)+'px)';
