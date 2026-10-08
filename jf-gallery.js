@@ -67,6 +67,7 @@
     transition:color .3s,filter .3s,opacity .3s;}
   #jf-gallery .jfg-cat:hover{color:var(--ink);}
   #jf-gallery .jfg-filters:hover .jfg-cat:not(:hover):not(.pinned){filter:blur(1.7px);opacity:.4;}
+  #jf-gallery .jfg-cat.jfg-dim:not(:hover):not(.pinned){filter:blur(1.7px);opacity:.38;}
   #jf-gallery .jfg-cat.pinned{color:var(--red);} #jf-gallery .jfg-cat.pinned::before{content:"— ";}
   #jf-gallery .jfg-cat:focus-visible{outline:1px solid var(--red);outline-offset:3px;}
   #jf-gallery .jfg-info{margin-top:auto;}
@@ -101,7 +102,7 @@
   /* ---- build DOM ---- */
   function el(tag,cls,html){var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
   var rail=el('aside','jfg-rail');
-  var viewToggle=el('button','jfg-vt','Contact sheet'); viewToggle.type='button';
+  var viewToggle=el('button','jfg-vt','Contact sheet view'); viewToggle.type='button';
   var filtersEl=el('nav','jfg-filters');
   var info=el('div','jfg-info');
   info.appendChild(el('div','jfg-swlabel','Selected Works'));
@@ -133,13 +134,23 @@
     return F;
   });
 
+  var catBtns=[];
   filterCats.forEach(function(cat){
     var b=el('button','jfg-cat',cat); b.type='button';
     b.addEventListener('click',function(){pinned.has(cat)?pinned.delete(cat):pinned.add(cat);b.classList.toggle('pinned',pinned.has(cat));refresh();});
     b.addEventListener('mouseenter',function(){preview=cat;refresh();});
     b.addEventListener('mouseleave',function(){preview=null;refresh();});
     filtersEl.appendChild(b);
+    catBtns.push({cat:cat,el:b});
   });
+  /* mirror the focused/hovered project's disciplines onto the filter list:
+     matching filters stay sharp, the rest reverse-blur (so cats needn't be listed under the title) */
+  function previewCats(cats){
+    catBtns.forEach(function(cb){
+      var lit = !cats || cb.el.classList.contains('pinned') || cats.indexOf(cb.cat)>=0;
+      cb.el.classList.toggle('jfg-dim', !lit);
+    });
+  }
   function isMatch(p){if(pinned.size){var ok=false;pinned.forEach(function(c){if(p.cats.indexOf(c)>=0)ok=true;});return ok;}if(preview)return p.cats.indexOf(preview)>=0;return true;}
 
   function layout(){
@@ -225,8 +236,8 @@
   function refresh(){ mode==='scroll'?schedule():paintGallery(); }
 
   var cur='',swapping=false,pendName='';
-  function clearFocus(){cur='';swapping=false;pName.textContent='';pMeta.textContent='';pDesc.textContent='';block.style.opacity='1';block.style.filter='none';}
-  function paint(p){pName.textContent=p.name;pMeta.textContent=(p.client?p.client+' · ':'')+p.cats.join(' / ');pDesc.textContent=p.bite;}
+  function clearFocus(){cur='';swapping=false;pName.textContent='';pMeta.textContent='';pDesc.textContent='';block.style.opacity='1';block.style.filter='none';previewCats(null);}
+  function paint(p){pName.textContent=p.name;pMeta.textContent=(p.client||'');pDesc.textContent=p.bite;previewCats(p.cats);}
   function setFocus(p){
     if(p.name===cur||(swapping&&p.name===pendName))return;
     if(cur===''){cur=p.name;paint(p);return;}
@@ -236,7 +247,7 @@
   }
 
   function setMode(m){
-    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery':'Contact sheet';
+    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Contact sheet view';
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();} else {layout();schedule();}
     sizePin();
   }
