@@ -4,14 +4,17 @@
    still. Works in the slider and the grid. No CMS changes needed. */
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  /* map: substring of the still's filename -> its loop video URL */
+  /* map: substring of the still's filename -> its loop video URL.
+     These keys are the 6 poster frames in the Telling the Bees
+     `additional-images` column; each poster is the first frame of its loop,
+     so the cross-fade from still to video is seamless. */
   var LOOPS={
-    'telling-the-bees-04': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164d050e6f4f39e7798a_ttb-loop-120s-bee-asters.mp4',
-    'telling-the-bees-02': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91652f4cdaff775b5e626_ttb-loop-87s-flowers.mp4',
-    'telling-the-bees-15': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164fc443597661ec87f0_ttb-loop-348s-beekeeper-hive.mp4',
-    'telling-the-bees-14': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164fa4ac5cd81349dd35_ttb-loop-345s-hive2.mp4',
-    'telling-the-bees-20': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91650d8d09e047d99fda8_ttb-loop-429s-flowers2.mp4',
-    'telling-the-bees-32': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91651a4ac5cd81349de10_ttb-loop-690s-flower-lace.mp4'
+    'ttb-loop-01': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91652f4cdaff775b5e626_ttb-loop-87s-flowers.mp4',
+    'ttb-loop-02': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164d050e6f4f39e7798a_ttb-loop-120s-bee-asters.mp4',
+    'ttb-loop-03': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164fa4ac5cd81349dd35_ttb-loop-345s-hive2.mp4',
+    'ttb-loop-04': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac9164fc443597661ec87f0_ttb-loop-348s-beekeeper-hive.mp4',
+    'ttb-loop-05': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91650d8d09e047d99fda8_ttb-loop-429s-flowers2.mp4',
+    'ttb-loop-06': 'https://cdn.prod.website-files.com/602d605a12decb1b2d8eda8c/6ac91651a4ac5cd81349de10_ttb-loop-690s-flower-lace.mp4'
   };
   function matchUrl(s){ for(var k in LOOPS){ if(s.indexOf(k)>=0) return LOOPS[k]; } return null; }
 
