@@ -163,10 +163,13 @@
     seq.forEach(function(fi,pos){
       var f=figs[fi], n=f.norm, wFrac=0.38+n*0.30, back=(n<0.34&&rng()<0.28); if(back)wFrac*=0.72;
       var w=clamp(wFrac*sw,sw*0.22,sw*0.72), h=w/f.aspect, yy=y;
-      /* fill the panel side-to-side: alternate hard-left / hard-right against the edges,
-         with light jitter. Overlap is allowed — it happens naturally from size differences.
+      /* fill the panel side-to-side with RHYTHM, not strict L/R pairs: a golden-ratio
+         sweep gives an organic, non-repeating horizontal walk, edge-weighted so images
+         favour the sides. Overlap happens naturally from size differences.
          (A few low-importance "back" images drift inward for depth.) */
-      var side=pos%2, edgeFrac = back ? (0.26+rng()*0.46) : (side===0 ? rng()*0.10 : 0.90+rng()*0.10);
+      var base=(pos*0.6180339887+0.37)%1;
+      var eb = base<0.5 ? 0.5*Math.pow(base*2,1.7) : 1-0.5*Math.pow((1-base)*2,1.7);
+      var edgeFrac = back ? (0.30+rng()*0.40) : clamp(eb+(rng()-0.5)*0.12,0,1);
       var x=clamp(edgeFrac*(sw-w),0,sw-w);
       f.w=w;f.h=h;f.x=x;f.y=yy; placed.push({x:x,y:yy,w:w,h:h});
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
