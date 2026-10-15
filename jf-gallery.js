@@ -161,21 +161,15 @@
     var seq=[], lo=0, hi=byImp.length-1;
     while(lo<=hi){ seq.push(byImp[lo++]); if(lo<=hi) seq.push(byImp[hi--]); }
     seq.forEach(function(fi,pos){
-      var f=figs[fi], n=f.norm, wFrac=0.40+n*0.30, back=(n<0.38&&rng()<0.5); if(back)wFrac*=0.70;
-      var w=clamp(wFrac*sw,sw*0.22,sw*0.80), h=w/f.aspect, yy=y, bestX=0, bestOv=1e9;
-      /* even vertical pitch (no gaps); pick the least-overlapping X */
-      for(var tries=0;tries<24;tries++){
-        var xFrac=back?0.14+rng()*0.58:(pos%2===0?rng()*0.30:0.52+rng()*0.34);
-        var x=clamp(xFrac*(sw-w),0,sw-w), mo=0;
-        for(var k=0;k<placed.length;k++){var r=placed[k];
-          var ix=Math.max(0,Math.min(x+w,r.x+r.w)-Math.max(x,r.x)), iy=Math.max(0,Math.min(yy+h,r.y+r.h)-Math.max(yy,r.y));
-          var ov=ix*iy/Math.min(w*h,r.w*r.h); if(ov>mo)mo=ov;
-        }
-        if(mo<bestOv){bestOv=mo;bestX=x;}
-        if(mo<=MAXO) break;
-      }
-      f.w=w;f.h=h;f.x=bestX;f.y=yy; placed.push({x:bestX,y:yy,w:w,h:h});
-      f.fig.style.width=w+'px';f.fig.style.left=bestX+'px';f.fig.style.top=yy+'px';
+      var f=figs[fi], n=f.norm, wFrac=0.38+n*0.30, back=(n<0.34&&rng()<0.28); if(back)wFrac*=0.72;
+      var w=clamp(wFrac*sw,sw*0.22,sw*0.72), h=w/f.aspect, yy=y;
+      /* fill the panel side-to-side: alternate hard-left / hard-right against the edges,
+         with light jitter. Overlap is allowed — it happens naturally from size differences.
+         (A few low-importance "back" images drift inward for depth.) */
+      var side=pos%2, edgeFrac = back ? (0.26+rng()*0.46) : (side===0 ? rng()*0.10 : 0.90+rng()*0.10);
+      var x=clamp(edgeFrac*(sw-w),0,sw-w);
+      f.w=w;f.h=h;f.x=x;f.y=yy; placed.push({x:x,y:yy,w:w,h:h});
+      f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
       y=yy+ sh*0.42 + h*0.16 + rng()*sh*0.12; maxB=Math.max(maxB,yy+h);
     });
     var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
