@@ -160,21 +160,24 @@
     var byImp=figs.map(function(f,i){return i;}).sort(function(a,b){return figs[b].norm-figs[a].norm;});
     var seq=[], lo=0, hi=byImp.length-1;
     while(lo<=hi){ seq.push(byImp[lo++]); if(lo<=hi) seq.push(byImp[hi--]); }
+    var prevTop=null, prevH=0;
     seq.forEach(function(fi,pos){
-      var f=figs[fi], n=f.norm, wFrac=0.24+n*0.24, back=(n<0.34&&rng()<0.26); if(back)wFrac*=0.80;
-      var w=clamp(wFrac*sw,sw*0.19,sw*0.50), h=w/f.aspect, yy=y;
-      /* RHYTHM, not L/R pairs: a golden-ratio sweep gives an organic, non-repeating
-         horizontal walk, edge-weighted to favour the sides. Images are kept narrow (≤50%
-         of the panel) so left and right read distinctly and the centre stays open — overlap
-         then happens incidentally from size differences, not as a central blob.
-         (A few low-importance "back" images drift inward for depth.) */
-      var base=(pos*0.6180339887+0.37)%1;
-      var eb = base<0.5 ? 0.5*Math.pow(base*2,1.9) : 1-0.5*Math.pow((1-base)*2,1.9);
-      var edgeFrac = back ? (0.32+rng()*0.36) : clamp(eb+(rng()-0.5)*0.10,0,1);
-      var x=clamp(edgeFrac*(sw-w),0,sw-w);
-      f.w=w;f.h=h;f.x=x;f.y=yy; placed.push({x:x,y:yy,w:w,h:h});
+      var f=figs[fi], n=f.norm, wFrac=0.24+n*0.24, back=(n<0.34&&rng()<0.20); if(back)wFrac*=0.82;
+      var w=clamp(wFrac*sw,sw*0.19,sw*0.50), h=w/f.aspect;
+      /* HORIZONTAL: a touch of deviation around centre, varied per image via a golden-ratio
+         walk — never a fixed left/right, so no two line up as a pair. */
+      var g=(pos*0.6180339887+0.37)%1;
+      var dev=clamp(0.5+(g-0.5)*(0.5+rng()*0.7),0.05,0.95);
+      var x=clamp(dev*(sw-w),0,sw-w);
+      /* VERTICAL: single-file down the page — each image sits just after the previous with a
+         small, irregular gap (little black space, essentially no overlap), and now and then a
+         larger breath. No even pitch → no 'rows of twos'. */
+      var yy;
+      if(prevTop===null){ yy=sh*0.26; }
+      else { var gap=sh*(0.03+rng()*0.13); if(rng()<0.22) gap+=sh*(0.20+rng()*0.22); yy=prevTop+prevH+gap; }
+      f.w=w;f.h=h;f.x=x;f.y=yy;
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
-      y=yy+ sh*(0.30+rng()*0.30) + h*0.18; maxB=Math.max(maxB,yy+h);
+      prevTop=yy; prevH=h; maxB=Math.max(maxB,yy+h);
     });
     var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
     track.style.height=(need+sh*1.7)+'px';
