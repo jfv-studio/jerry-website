@@ -127,7 +127,7 @@
     if(p.url) inner.setAttribute('aria-label',p.name);
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading='eager';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
-    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.86+norm*0.34,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
+    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.90+norm*0.20,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;if(mode==='gallery')clearFocus();schedule();});
@@ -162,19 +162,19 @@
     while(lo<=hi){ seq.push(byImp[lo++]); if(lo<=hi) seq.push(byImp[hi--]); }
     var prevTop=null, prevH=0;
     seq.forEach(function(fi,pos){
-      var f=figs[fi], n=f.norm, wFrac=0.24+n*0.24, back=(n<0.34&&rng()<0.20); if(back)wFrac*=0.82;
-      var w=clamp(wFrac*sw,sw*0.19,sw*0.50), h=w/f.aspect;
-      /* HORIZONTAL: a touch of deviation around centre, varied per image via a golden-ratio
-         walk — never a fixed left/right, so no two line up as a pair. */
+      var f=figs[fi], n=f.norm, wFrac=0.42+n*0.28, back=(n<0.30&&rng()<0.14); if(back)wFrac*=0.85;
+      var w=clamp(wFrac*sw,sw*0.34,sw*0.74), h=w/f.aspect;
+      /* HORIZONTAL: swing left/right so each image is clearly offset from the last (a stagger),
+         varied amount, golden-ratio so it's not a fixed beat. */
       var g=(pos*0.6180339887+0.37)%1;
-      var dev=clamp(0.5+(g-0.5)*(0.5+rng()*0.7),0.05,0.95);
+      var dev=clamp(0.5+(g-0.5)*(0.9+rng()*0.5),0.02,0.98);
       var x=clamp(dev*(sw-w),0,sw-w);
-      /* VERTICAL: single-file down the page — each image sits just after the previous with a
-         small, irregular gap (little black space, essentially no overlap), and now and then a
-         larger breath. No even pitch → no 'rows of twos'. */
+      /* VERTICAL: one-at-a-time staggered rhythm — pitch ≈ the previous image's height, so you
+         read one image, then the next below-and-offset (not two-up). Mostly a hair of gap;
+         now and then a ~5% overlap for life. Big images, little black space. */
       var yy;
-      if(prevTop===null){ yy=sh*0.26; }
-      else { var gap=sh*(0.03+rng()*0.13); if(rng()<0.22) gap+=sh*(0.20+rng()*0.22); yy=prevTop+prevH+gap; }
+      if(prevTop===null){ yy=sh*0.20; }
+      else { var fac=(rng()<0.28)?(0.95+rng()*0.05):(1.0+rng()*0.12); yy=prevTop+prevH*fac; }
       f.w=w;f.h=h;f.x=x;f.y=yy;
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
       prevTop=yy; prevH=h; maxB=Math.max(maxB,yy+h);
