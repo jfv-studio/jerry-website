@@ -102,8 +102,8 @@
   /* ---- build DOM ---- */
   function el(tag,cls,html){var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
   var rail=el('aside','jfg-rail');
-  var viewToggle=el('button','jfg-vt','Contact sheet view'); viewToggle.type='button';
-  var filtersEl=el('nav','jfg-filters');
+  var viewToggle=el('button','jfg-vt','Filter view'); viewToggle.type='button';
+  var filtersEl=el('nav','jfg-filters'); filtersEl.style.display='none'; /* filters live only in Filter view */
   var info=el('div','jfg-info');
   info.appendChild(el('div','jfg-swlabel','Selected Works'));
   var block=el('div','jfg-focus');
@@ -248,8 +248,10 @@
   }
 
   function setMode(m){
-    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Contact sheet view';
-    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();} else {layout();schedule();}
+    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Filter view';
+    filtersEl.style.display=(m==='gallery')?'flex':'none';   /* filters only in Filter view */
+    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
+    else {pinned.clear();preview=null;catBtns.forEach(function(cb){cb.el.classList.remove('pinned');});previewCats(null);layout();schedule();}
     sizePin();
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
