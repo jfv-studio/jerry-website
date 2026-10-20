@@ -103,7 +103,7 @@
   function el(tag,cls,html){var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
   var rail=el('aside','jfg-rail');
   var viewToggle=el('button','jfg-vt','Filter view'); viewToggle.type='button';
-  var filtersEl=el('nav','jfg-filters'); filtersEl.style.display='none'; /* filters live only in Filter view */
+  var filtersEl=el('nav','jfg-filters');
   var info=el('div','jfg-info');
   info.appendChild(el('div','jfg-swlabel','Selected Works'));
   var block=el('div','jfg-focus');
@@ -137,7 +137,7 @@
   var catBtns=[];
   filterCats.forEach(function(cat){
     var b=el('button','jfg-cat',cat); b.type='button';
-    b.addEventListener('click',function(){pinned.has(cat)?pinned.delete(cat):pinned.add(cat);b.classList.toggle('pinned',pinned.has(cat));refresh();});
+    b.addEventListener('click',function(){if(mode!=='gallery')return;/* clicking filters only acts in Filter view */pinned.has(cat)?pinned.delete(cat):pinned.add(cat);b.classList.toggle('pinned',pinned.has(cat));refresh();});
     b.addEventListener('mouseenter',function(){preview=cat;refresh();});
     b.addEventListener('mouseleave',function(){preview=null;refresh();});
     filtersEl.appendChild(b);
@@ -249,7 +249,6 @@
 
   function setMode(m){
     mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Filter view';
-    filtersEl.style.display=(m==='gallery')?'flex':'none';   /* filters only in Filter view */
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
     else {pinned.clear();preview=null;catBtns.forEach(function(cb){cb.el.classList.remove('pinned');});previewCats(null);layout();schedule();}
     sizePin();
