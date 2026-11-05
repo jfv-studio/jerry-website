@@ -36,8 +36,13 @@
       var a=n.querySelector('a'), url=n.getAttribute('data-url')||(a&&a.getAttribute('href'))||(n.tagName==='A'?n.getAttribute('href'):'');
       projects.push({name:n.getAttribute('data-name')||'',img:src,cats:cs,url:url||'',
         client:n.getAttribute('data-client')||'',bite:n.getAttribute('data-bite')||'',
-        imp:parseFloat(n.getAttribute('data-imp'))||55,cred:parseFloat(n.getAttribute('data-cred'))||70});
+        imp:parseFloat(n.getAttribute('data-imp'))||55,cred:parseFloat(n.getAttribute('data-cred'))||70,
+        _fpRaw:n.getAttribute('data-fp')});
     });
+    /* front-page flag: if any item carries data-fp, non-flagged items are grid-only (featured but not
+       front-page); if NO item carries it, every item is front-page (today's behaviour, safe default). */
+    var anyFp=projects.some(function(p){return p._fpRaw!=null&&p._fpRaw!=='';});
+    projects.forEach(function(p){var v=(p._fpRaw||'').toLowerCase();p.fp=anyFp?(v==='1'||v==='true'||v==='on'||v==='yes'):true;delete p._fpRaw;});
     var listWrap=nodes[0].closest('.w-dyn-list')||nodes[0].parentNode;
     if(listWrap) listWrap.style.display='none';
     return projects.length?{projects:projects,categories:Object.keys(cats).sort()}:null;
@@ -127,7 +132,7 @@
     if(p.url) inner.setAttribute('aria-label',p.name);
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading='eager';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
-    var F={p:p,fig:fig,norm:norm,aspect:1,speed:1.0,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
+    var F={p:p,fig:fig,norm:norm,aspect:1,speed:1.0,fp:(p.fp===undefined||p.fp===null)?true:!!p.fp,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;if(mode==='gallery')clearFocus();schedule();});
@@ -161,8 +166,9 @@
   function layout(){
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight;
     var rng=mulberry32(SEED), MAXO=0.05, placed=[], y=sh*0.33, maxB=0;
+    figs.forEach(function(f){ f.fig.style.display=f.fp?'':'none'; });  /* landing scatter = front-page set only */
     /* interleave placement order big/small so no screen gets a clump of big images */
-    var byImp=figs.map(function(f,i){return i;}).sort(function(a,b){return figs[b].norm-figs[a].norm;});
+    var byImp=figs.map(function(f,i){return i;}).filter(function(i){return figs[i].fp;}).sort(function(a,b){return figs[b].norm-figs[a].norm;});
     var seq=[], lo=0, hi=byImp.length-1;
     while(lo<=hi){ seq.push(byImp[lo++]); if(lo<=hi) seq.push(byImp[hi--]); }
     var prevTop=null, prevH=0;
@@ -184,10 +190,11 @@
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
       prevTop=yy; prevH=h; maxB=Math.max(maxB,yy+h);
     });
-    var need=0; figs.forEach(function(f){var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
+    var need=0; figs.forEach(function(f){if(!f.fp)return;var sc=(f.y+f.h/2-sh/2)/f.speed; if(sc>need)need=sc;});
     track.style.height=(need+sh*1.7)+'px';
   }
   function layoutGallery(){
+    figs.forEach(function(f){ f.fig.style.display=''; });  /* grid view shows the full featured set */
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight, n=figs.length;
     var cols=clamp(Math.round(sw/300),3,5), rows=Math.ceil(n/cols), cw=sw/cols, chh=sh/rows, rng=mulberry32(0xCA7A106);
     figs.forEach(function(f,i){
@@ -210,6 +217,7 @@
     var endP=clamp((scroll-(maxScroll-sr.height*0.9))/(sr.height*0.9),0,1);
     var best=-1,bestScore=1e9;
     figs.forEach(function(f,i){
+      if(!f.fp){ return; }  /* scatter ignores featured-only (grid-only) items */
       var centreY=(f.y+f.h/2)-scroll*f.speed, d=Math.abs(centreY-cy)/half; if(d>1)d=1;
       var match=isMatch(f.p); f.locked=(pinned.size>0&&!match); f.fig.classList.toggle('locked',f.locked);
       var forced=(i===hoverIdx&&!f.locked), t=forced?0:d, blur,op;
