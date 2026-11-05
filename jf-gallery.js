@@ -127,7 +127,7 @@
     if(p.url) inner.setAttribute('aria-label',p.name);
     var img=new Image(); img.src=p.img; img.alt=p.name; img.loading='eager';
     inner.appendChild(img); fig.appendChild(inner); track.appendChild(fig);
-    var F={p:p,fig:fig,norm:norm,aspect:1,speed:0.90+norm*0.20,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
+    var F={p:p,fig:fig,norm:norm,aspect:1,speed:1.0,baseBlur:(1-norm)*1.0,x:0,y:0,w:0,h:0,gx:0,gy:0,baseZ:10+Math.round(norm*80),locked:false};
     img.addEventListener('load',function(){ F.aspect=(img.naturalWidth/img.naturalHeight)||1; if(mode==='scroll'){layout();sizePin();schedule();} else {layoutGallery();paintGallery();} });
     fig.addEventListener('mouseenter',function(){var lk=pinned.size>0&&!isMatch(p);if(lk)return;hoverIdx=figs.indexOf(F);fig.classList.add('hov');if(mode==='gallery')setFocus(p);schedule();});
     fig.addEventListener('mouseleave',function(){fig.classList.remove('hov');if(hoverIdx===figs.indexOf(F))hoverIdx=-1;if(mode==='gallery')clearFocus();schedule();});
@@ -137,7 +137,12 @@
   var catBtns=[];
   filterCats.forEach(function(cat){
     var b=el('button','jfg-cat',cat); b.type='button';
-    b.addEventListener('click',function(){if(mode!=='gallery')return;/* clicking filters only acts in Filter view */pinned.has(cat)?pinned.delete(cat):pinned.add(cat);b.classList.toggle('pinned',pinned.has(cat));refresh();});
+    b.addEventListener('click',function(){
+      if(mode!=='gallery'){ preview=null; setMode('gallery'); } /* a filter click from the landing jumps straight into the grid, filter applied */
+      pinned.has(cat)?pinned.delete(cat):pinned.add(cat);
+      b.classList.toggle('pinned',pinned.has(cat));
+      refresh();
+    });
     b.addEventListener('mouseenter',function(){preview=cat;refresh();});
     b.addEventListener('mouseleave',function(){preview=null;refresh();});
     filtersEl.appendChild(b);
@@ -169,12 +174,12 @@
       var g=(pos*0.6180339887+0.37)%1;
       var dev=clamp(0.5+(g-0.5)*(0.9+rng()*0.5),0.02,0.98);
       var x=clamp(dev*(sw-w),0,sw-w);
-      /* VERTICAL: one-at-a-time staggered rhythm — pitch ≈ the previous image's height, so you
-         read one image, then the next below-and-offset (not two-up). Mostly a hair of gap;
-         now and then a ~5% overlap for life. Big images, little black space. */
+      /* VERTICAL: one image per row. Pitch ≈ the previous image's height so each image reads on
+         its own. About half the time a gentle ~10% overlap, the rest a small gap — never buried
+         (speed is uniform now, so rows hold their spacing instead of drifting over each other). */
       var yy;
       if(prevTop===null){ yy=sh*0.20; }
-      else { var fac=(rng()<0.28)?(0.95+rng()*0.05):(1.0+rng()*0.12); yy=prevTop+prevH*fac; }
+      else { var fac=(rng()<0.5)?(0.86+rng()*0.08):(1.02+rng()*0.10); yy=prevTop+prevH*fac; }
       f.w=w;f.h=h;f.x=x;f.y=yy;
       f.fig.style.width=w+'px';f.fig.style.left=x+'px';f.fig.style.top=yy+'px';
       prevTop=yy; prevH=h; maxB=Math.max(maxB,yy+h);
