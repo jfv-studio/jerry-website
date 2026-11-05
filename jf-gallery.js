@@ -219,7 +219,7 @@
       /* delicate depth parallax: bounded, and zero at the centreline so the layout/overlap is never
          disturbed where it reads; drift grows gently toward the (already-blurring) edges. By depth
          (importance) so foreground pieces move a hair more than background. Tune PARAMP for strength. */
-      var PARAMP=0.08, par=clamp(cy-centreY,-half,half)*PARAMP*(0.4+f.norm*0.6);
+      var PARAMP=0.14, par=clamp(cy-centreY,-half,half)*PARAMP*(0.4+f.norm*0.6);
       f.fig.style.transform='translateY('+(reduce?0:par).toFixed(1)+'px)';
       f.fig.style.filter='blur('+blur.toFixed(2)+'px)';
       f.fig.style.opacity=op.toFixed(3);
