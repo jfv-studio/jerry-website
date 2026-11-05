@@ -139,8 +139,8 @@
     var b=el('button','jfg-cat',cat); b.type='button';
     b.addEventListener('click',function(){
       if(mode!=='gallery'){ preview=null; setMode('gallery'); } /* a filter click from the landing jumps straight into the grid, filter applied */
-      pinned.has(cat)?pinned.delete(cat):pinned.add(cat);
-      b.classList.toggle('pinned',pinned.has(cat));
+      var was=pinned.has(cat); pinned.clear(); if(!was) pinned.add(cat); /* exclusive: one filter at a time; re-click the active one clears back to all */
+      catBtns.forEach(function(cb){ cb.el.classList.toggle('pinned', pinned.has(cb.cat)); });
       refresh();
     });
     b.addEventListener('mouseenter',function(){preview=cat;refresh();});
