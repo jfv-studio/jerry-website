@@ -216,7 +216,11 @@
       if(f.locked){blur=8;op=0.08+f.p.cred/100*0.14;}
       else{blur=f.baseBlur*t+t*t*4.5; op=1-t*0.46;}
       blur+=endP*7; op*=(1-endP*0.85);
-      f.fig.style.transform='translateY('+(reduce?0:scroll*(1-f.speed)).toFixed(1)+'px)';
+      /* delicate depth parallax: bounded, and zero at the centreline so the layout/overlap is never
+         disturbed where it reads; drift grows gently toward the (already-blurring) edges. By depth
+         (importance) so foreground pieces move a hair more than background. Tune PARAMP for strength. */
+      var PARAMP=0.08, par=clamp(cy-centreY,-half,half)*PARAMP*(0.4+f.norm*0.6);
+      f.fig.style.transform='translateY('+(reduce?0:par).toFixed(1)+'px)';
       f.fig.style.filter='blur('+blur.toFixed(2)+'px)';
       f.fig.style.opacity=op.toFixed(3);
       /* whatever is nearest the centreline rises to the top so it is never buried */
