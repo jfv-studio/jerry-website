@@ -31,7 +31,7 @@
       var src=n.getAttribute('data-img')||'';
       if(!src){var ii=n.querySelectorAll('img');for(var q=0;q<ii.length;q++){var s=realSrc(ii[q]);if(s){src=s;break;}}}
       if(!src) return;
-      var cs=(n.getAttribute('data-cats')||'').replace(/ \/ /g,'/').split(',').map(function(s){return s.trim();}).filter(Boolean);
+      var cs=(n.getAttribute('data-cats')||'').replace(/ \/ /g,'/').split(',').map(function(s){return s.trim();}).(Boolean);
       cs.forEach(function(c){cats[c]=1;});
       var a=n.querySelector('a'), url=n.getAttribute('data-url')||(a&&a.getAttribute('href'))||(n.tagName==='A'?n.getAttribute('href'):'');
       projects.push({name:n.getAttribute('data-name')||'',img:src,cats:cs,url:url||'',
@@ -107,7 +107,7 @@
   /* ---- build DOM ---- */
   function el(tag,cls,html){var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
   var rail=el('aside','jfg-rail');
-  var viewToggle=el('button','jfg-vt','Filter view'); viewToggle.type='button';
+  var viewToggle=el('button','jfg-vt','Thumbnails'); viewToggle.type='button';
   var filtersEl=el('nav','jfg-filters');
   var info=el('div','jfg-info');
   info.appendChild(el('div','jfg-swlabel','Selected Works'));
@@ -265,7 +265,7 @@
   }
 
   function setMode(m){
-    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Filter view';
+    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Thumbnails';
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
     else {pinned.clear();preview=null;catBtns.forEach(function(cb){cb.el.classList.remove('pinned');});previewCats(null);layout();schedule();}
     sizePin();
