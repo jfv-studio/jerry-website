@@ -50,7 +50,7 @@
     '#jf-logos .jlw-group{margin-bottom:clamp(30px,5vw,52px);}' +
     '#jf-logos .jlw-group:last-child{margin-bottom:0;}' +
     '#jf-logos .jlw-label{font-family:var(--display);font-weight:700;font-size:clamp(12px,1vw,16px);' +
-      'letter-spacing:.02em;text-transform:uppercase;color:currentColor;opacity:.86;margin:0 0 clamp(18px,3vw,30px);}' +
+      'letter-spacing:.02em;text-transform:uppercase;color:#fff;opacity:.86;margin:0 0 clamp(18px,3vw,30px);}' +
     '#jf-logos .jlw-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;' +
       'gap:clamp(22px,3.2vw,44px) clamp(26px,4vw,52px);}' +
     '#jf-logos .jlw-cell{display:flex;align-items:center;justify-content:center;}' +
