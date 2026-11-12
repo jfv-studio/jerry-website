@@ -31,7 +31,7 @@
       var src=n.getAttribute('data-img')||'';
       if(!src){var ii=n.querySelectorAll('img');for(var q=0;q<ii.length;q++){var s=realSrc(ii[q]);if(s){src=s;break;}}}
       if(!src) return;
-      var cs=(n.getAttribute('data-cats')||'').replace(/ \/ /g,'/').split(',').map(function(s){return s.trim();}).(Boolean);
+      var cs=(n.getAttribute('data-cats')||'').replace(/ \/ /g,'/').split(',').map(function(s){return s.trim();}).filter(Boolean);
       cs.forEach(function(c){cats[c]=1;});
       var a=n.querySelector('a'), url=n.getAttribute('data-url')||(a&&a.getAttribute('href'))||(n.tagName==='A'?n.getAttribute('href'):'');
       projects.push({name:n.getAttribute('data-name')||'',img:src,cats:cs,url:url||'',
@@ -94,13 +94,32 @@
   #jf-gallery .jfg-closer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;z-index:5;padding:0 8vw;}
   #jf-gallery .jfg-closer .ci{max-width:22ch;text-align:center;font-family:var(--serif);font-weight:300;font-size:clamp(22px,2.4vw,34px);line-height:1.35;color:var(--ink);}
   #jf-gallery .jfg-closer .ci em{color:var(--red);font-style:normal;}
+  #jf-gallery .jfg-mbar{display:none;}   /* desktop: hidden; the left rail is the control surface */
   @media (prefers-reduced-motion: reduce){#jf-gallery .jfg-fig .inner,#jf-gallery .jfg-focus{transition:none;}}
   @media (max-width:820px){
     #jf-gallery{height:100vh;}
-    #jf-gallery .jfg-rail{position:absolute;left:0;right:0;bottom:0;width:100%;flex:none;z-index:10;padding:14px 5vw calc(12px + var(--pb));
-      background:linear-gradient(0deg,rgba(0,0,0,.92) 72%,rgba(0,0,0,0));flex-direction:column-reverse;}
-    #jf-gallery .jfg-vt{display:none;} #jf-gallery .jfg-filters{margin:10px 0 0;flex-flow:row wrap;gap:5px 16px;} #jf-gallery .jfg-cat{font-size:12px;}
-    #jf-gallery .jfg-info{margin:0;} #jf-gallery .jfg-swlabel{display:none;} #jf-gallery .jfg-focus{height:auto;} #jf-gallery .jfg-name{font-size:20px;} #jf-gallery .jfg-desc{display:none;} #jf-gallery .jfg-meta{margin-top:7px;}
+    /* the left-column rail becomes the discipline picker — shown ONLY in grid/thumbnail view,
+       sitting just above the persistent bottom bar */
+    #jf-gallery .jfg-rail{position:absolute;left:0;right:0;bottom:44px;width:100%;flex:none;z-index:11;
+      padding:10px 5vw;background:linear-gradient(0deg,rgba(0,0,0,.9) 60%,rgba(0,0,0,0));
+      flex-direction:column;opacity:1 !important;filter:none !important;}
+    #jf-gallery .jfg-vt{display:none;}
+    #jf-gallery .jfg-info{display:none;}
+    #jf-gallery .jfg-filters{margin:0;flex-flow:row wrap;gap:6px 14px;}
+    #jf-gallery .jfg-cat{font-size:12px;}
+    #jf-gallery:not(.mode-gallery) .jfg-rail{display:none;}   /* scatter view = no discipline stack */
+    /* persistent minimal bottom bar: Selected Works (L) · Thumbnails/Gallery (C) · active discipline (R) */
+    #jf-gallery .jfg-mbar{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+      position:absolute;left:0;right:0;bottom:0;z-index:12;padding:12px 5vw calc(12px + var(--pb));
+      background:linear-gradient(0deg,rgba(0,0,0,.95) 65%,rgba(0,0,0,0));
+      font-family:var(--ui);text-transform:uppercase;letter-spacing:.14em;font-size:10px;}
+    #jf-gallery .jfg-m-left{color:rgba(242,240,236,.6);white-space:nowrap;}
+    #jf-gallery .jfg-m-mid{appearance:none;background:none;border:0;padding:0;cursor:pointer;
+      font:inherit;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,240,236,.92);}
+    #jf-gallery .jfg-m-right{appearance:none;background:none;border:0;padding:0;cursor:pointer;font:inherit;
+      letter-spacing:.14em;text-transform:uppercase;text-align:right;white-space:nowrap;color:var(--red);
+      max-width:42%;overflow:hidden;text-overflow:ellipsis;}
+    #jf-gallery .jfg-m-right:empty{opacity:0;pointer-events:none;}
   }`;
   var st=document.createElement('style'); st.textContent=CSS; document.head.appendChild(st);
 
@@ -119,6 +138,24 @@
   var closer=el('div','jfg-closer','<div class="ci">I design the <em>atmosphere</em> that makes a story feel real, through an inquisitive process.</div>');
   stage.appendChild(track); stage.appendChild(closer);
   root.appendChild(rail); root.appendChild(stage);
+  /* mobile-only bottom bar: Selected Works (L) · Thumbnails/Gallery (C) · active discipline (R) */
+  var mbar=el('div','jfg-mbar');
+  var mLeft=el('div','jfg-m-left','Selected Works');
+  var mMid=el('button','jfg-m-mid','Thumbnails'); mMid.type='button';
+  var mRight=el('button','jfg-m-right',''); mRight.type='button';
+  mbar.appendChild(mLeft); mbar.appendChild(mMid); mbar.appendChild(mRight);
+  root.appendChild(mbar);
+  function updateMBar(){
+    mMid.textContent=(mode==='gallery')?'Gallery':'Thumbnails';
+    var active=''; pinned.forEach(function(c){active=c;});
+    mRight.textContent=active;   /* empty when no filter -> hidden via :empty; tap to clear */
+  }
+  mMid.addEventListener('click',function(){ setMode(mode==='scroll'?'gallery':'scroll'); });
+  mRight.addEventListener('click',function(){
+    if(!pinned.size) return;
+    pinned.clear(); catBtns.forEach(function(cb){ cb.el.classList.remove('pinned'); });
+    refresh(); updateMBar();
+  });
 
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var clamp=function(v,a,b){return v<a?a:v>b?b:v;};
@@ -146,7 +183,7 @@
       if(mode!=='gallery'){ preview=null; setMode('gallery'); } /* a filter click from the landing jumps straight into the grid, filter applied */
       var was=pinned.has(cat); pinned.clear(); if(!was) pinned.add(cat); /* exclusive: one filter at a time; re-click the active one clears back to all */
       catBtns.forEach(function(cb){ cb.el.classList.toggle('pinned', pinned.has(cb.cat)); });
-      refresh();
+      refresh(); updateMBar();
     });
     b.addEventListener('mouseenter',function(){preview=cat;refresh();});
     b.addEventListener('mouseleave',function(){preview=null;refresh();});
@@ -265,10 +302,15 @@
   }
 
   function setMode(m){
-    mode=m; stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Thumbnails';
+    mode=m; root.classList.toggle('mode-gallery',m==='gallery'); stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Thumbnails';
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
-    else {pinned.clear();preview=null;catBtns.forEach(function(cb){cb.el.classList.remove('pinned');});previewCats(null);layout();schedule();}
+    else {preview=null;previewCats(null);layout();schedule();}   /* keep the active filter when returning to the scatter view */
+    updateMBar();
     sizePin();
+    /* re-anchor the page to the gallery's top so a mode switch never lands you in a
+       dead scroll gap or throws you onto the next/prev section (the mobile filter-tap bug) */
+    var anchorY=wrap.getBoundingClientRect().top+(window.pageYOffset||document.documentElement.scrollTop||0);
+    window.scrollTo(0,Math.max(0,Math.round(anchorY)));
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
 
@@ -281,7 +323,10 @@
   var pinH=0;
   /* keep the pin geometry constant across modes so switching to Contact sheet
      doesn't collapse the pin (which let the whole section scroll away) */
-  function sizePin(){ if(mode==='scroll'){ pinH=stage.clientHeight+internalMax(); } wrap.style.height=(pinH||stage.clientHeight)+'px'; }
+  function sizePin(){
+    if(mode==='scroll'){ pinH=stage.clientHeight+internalMax(); wrap.style.height=pinH+'px'; }
+    else { wrap.style.height=stage.clientHeight+'px'; }   /* grid/contact-sheet = exactly one screen; no leftover dead-scroll region (the mobile filter-tap bug) */
+  }
   function onPageScroll(){
     if(mode!=='scroll') return;
     var im=internalMax(); if(im<1){schedule();return;}
@@ -295,5 +340,5 @@
     if(w!==lastW){ lastW=w; if(mode==='scroll'){layout();} else {layoutGallery();} }
     sizePin(); (mode==='scroll'?schedule():paintGallery());
   });
-  layout(); sizePin(); schedule();
+  updateMBar(); layout(); sizePin(); schedule();
 })();
