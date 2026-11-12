@@ -100,7 +100,7 @@
     #jf-gallery{height:100vh;}
     /* the left-column rail becomes the discipline picker — shown ONLY in grid/thumbnail view,
        sitting just above the persistent bottom bar */
-    #jf-gallery .jfg-rail{position:absolute;left:0;right:0;bottom:44px;width:100%;flex:none;z-index:11;
+    #jf-gallery .jfg-rail{position:absolute;left:0;right:0;bottom:44px;width:100%;flex:none;z-index:80;
       padding:10px 5vw;background:linear-gradient(0deg,rgba(0,0,0,.9) 60%,rgba(0,0,0,0));
       flex-direction:column;opacity:1 !important;filter:none !important;}
     #jf-gallery .jfg-vt{display:none;}
@@ -110,7 +110,7 @@
     #jf-gallery:not(.mode-gallery) .jfg-rail{display:none;}   /* scatter view = no discipline stack */
     /* persistent minimal bottom bar: Selected Works (L) · Thumbnails/Gallery (C) · active discipline (R) */
     #jf-gallery .jfg-mbar{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-      position:absolute;left:0;right:0;bottom:0;z-index:12;padding:12px 5vw calc(12px + var(--pb));
+      position:absolute;left:0;right:0;bottom:0;z-index:85;padding:12px 5vw calc(12px + var(--pb));
       background:linear-gradient(0deg,rgba(0,0,0,.95) 65%,rgba(0,0,0,0));
       font-family:var(--ui);text-transform:uppercase;letter-spacing:.14em;font-size:10px;}
     #jf-gallery .jfg-m-left{color:rgba(242,240,236,.6);white-space:nowrap;}
@@ -301,6 +301,15 @@
     setTimeout(function(){paint(p);requestAnimationFrame(function(){block.style.opacity='1';block.style.filter='blur(0px)';setTimeout(function(){swapping=false;},180);});},170);
   }
 
+  /* in grid/thumbnail view the page is held fixed & stable — no scrolling away from it */
+  var _scrollLocked=false;
+  function lockScroll(on){
+    if(on===_scrollLocked) return; _scrollLocked=on;
+    try{ document.documentElement.style.overflow=on?'hidden':'';
+         document.body.style.overflow=on?'hidden':''; }catch(e){}
+  }
+  document.addEventListener('touchmove',function(e){ if(mode==='gallery') e.preventDefault(); },{passive:false});
+
   function setMode(m){
     mode=m; root.classList.toggle('mode-gallery',m==='gallery'); stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Thumbnails';
     if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
@@ -309,8 +318,10 @@
     sizePin();
     /* re-anchor the page to the gallery's top so a mode switch never lands you in a
        dead scroll gap or throws you onto the next/prev section (the mobile filter-tap bug) */
+    lockScroll(false);                 /* release before repositioning so scrollTo lands */
     var anchorY=wrap.getBoundingClientRect().top+(window.pageYOffset||document.documentElement.scrollTop||0);
     window.scrollTo(0,Math.max(0,Math.round(anchorY)));
+    lockScroll(mode==='gallery');      /* re-lock when in grid view => fixed & stable */
   }
   viewToggle.addEventListener('click',function(){setMode(mode==='scroll'?'gallery':'scroll');});
 
