@@ -145,16 +145,23 @@
   var mRight=el('button','jfg-m-right',''); mRight.type='button';
   mbar.appendChild(mLeft); mbar.appendChild(mMid); mbar.appendChild(mRight);
   root.appendChild(mbar);
+  var focusP=null;   /* the project currently in focus (updated as the scatter scrolls) */
   function updateMBar(){
     mMid.textContent=(mode==='gallery')?'Gallery':'Thumbnails';
-    var active=''; pinned.forEach(function(c){active=c;});
-    mRight.textContent=active;   /* empty when no filter -> hidden via :empty; tap to clear */
+    setMRight();
+  }
+  /* right slot = the in-focus project title while scrolling the scatter; the active discipline in grid view */
+  function setMRight(){
+    if(mode==='gallery'){ var a=''; pinned.forEach(function(c){a=c;}); mRight.textContent=a; }
+    else { mRight.textContent=(focusP&&focusP.name)?focusP.name:''; }
   }
   mMid.addEventListener('click',function(){ setMode(mode==='scroll'?'gallery':'scroll'); });
   mRight.addEventListener('click',function(){
-    if(!pinned.size) return;
-    pinned.clear(); catBtns.forEach(function(cb){ cb.el.classList.remove('pinned'); });
-    refresh(); updateMBar();
+    if(mode==='gallery'){
+      if(!pinned.size) return;
+      pinned.clear(); catBtns.forEach(function(cb){ cb.el.classList.remove('pinned'); });
+      refresh(); updateMBar();
+    } else if(focusP&&focusP.url){ window.location.href=focusP.url; }   /* tap the in-focus title -> open the project */
   });
 
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -233,13 +240,22 @@
   function layoutGallery(){
     figs.forEach(function(f){ f.fig.style.display=''; });  /* grid view shows the full featured set */
     var sw=stage.clientWidth, sh=stage.clientHeight||innerHeight, n=figs.length;
-    var cols=clamp(Math.round(sw/300),3,5), rows=Math.ceil(n/cols), cw=sw/cols, chh=sh/rows, rng=mulberry32(0xCA7A106);
+    /* on mobile, keep the whole contact sheet between the nav (top) and the filter chips + bottom bar,
+       so no row is hidden behind them */
+    var topPad=0, botPad=0;
+    if(matchMedia('(max-width:820px)').matches){
+      topPad=72;
+      var rh=rail.getBoundingClientRect().height||110;
+      botPad=Math.round(44+rh+10);
+    }
+    var availH=Math.max(140, sh-topPad-botPad);
+    var cols=clamp(Math.round(sw/300),3,5), rows=Math.ceil(n/cols), cw=sw/cols, chh=availH/rows, rng=mulberry32(0xCA7A106);
     figs.forEach(function(f,i){
       var col=i%cols, row=Math.floor(i/cols), nn=f.norm;
       var w=clamp((0.5+nn*0.34)*cw, cw*0.42, cw*0.92);
       if(w/f.aspect>chh*0.86) w=chh*0.86*f.aspect;
-      var h=w/f.aspect, jx=(rng()*2-1)*cw*0.17, jy=(rng()*2-1)*chh*0.17;
-      f.gx=clamp(col*cw+cw/2+jx-w/2,2,sw-w-2); f.gy=clamp(row*chh+chh/2+jy-h/2,2,sh-h-2);
+      var h=w/f.aspect, jx=(rng()*2-1)*cw*0.17, jy=(rng()*2-1)*chh*0.14;
+      f.gx=clamp(col*cw+cw/2+jx-w/2,2,sw-w-2); f.gy=clamp(topPad+row*chh+chh/2+jy-h/2, topPad+2, sh-botPad-h-2);
       f.fig.style.width=w+'px';f.fig.style.left=f.gx+'px';f.fig.style.top=f.gy+'px';f.fig.style.zIndex=20+Math.round(nn*40);
     });
     track.style.height=sh+'px';
@@ -276,6 +292,8 @@
     var emergeIn=reduce?1:clamp(scroll/(sr.height*0.12),0,1);
     var railA=reduce?1:emergeIn*(1-endP);                 /* emerge at start, submerge at end */
     rail.style.opacity=railA.toFixed(3); rail.style.filter='blur('+((1-railA)*8).toFixed(1)+'px)';
+    /* mobile bottom bar fades out as the scatter ends, so it doesn't float over the next (logo) section */
+    var mA=clamp(1-endP*1.15,0,1); mbar.style.opacity=mA.toFixed(3); mbar.style.pointerEvents=mA<0.05?'none':'';
     if(best>=0&&endP<0.5) setFocus(DATA.projects[best]);
   }
   function paintGallery(){
@@ -291,8 +309,8 @@
   function refresh(){ mode==='scroll'?schedule():paintGallery(); }
 
   var cur='',swapping=false,pendName='';
-  function clearFocus(){cur='';swapping=false;pName.textContent='';pMeta.textContent='';pDesc.textContent='';block.style.opacity='1';block.style.filter='none';previewCats(null);}
-  function paint(p){pName.textContent=p.name;pMeta.textContent=(p.client||'');pDesc.textContent=p.bite;previewCats(p.cats);}
+  function clearFocus(){cur='';focusP=null;swapping=false;pName.textContent='';pMeta.textContent='';pDesc.textContent='';block.style.opacity='1';block.style.filter='none';previewCats(null);if(mode!=='gallery')mRight.textContent='';}
+  function paint(p){focusP=p;pName.textContent=p.name;pMeta.textContent=(p.client||'');pDesc.textContent=p.bite;previewCats(p.cats);if(mode!=='gallery')mRight.textContent=p.name;}
   function setFocus(p){
     if(p.name===cur||(swapping&&p.name===pendName))return;
     if(cur===''){cur=p.name;paint(p);return;}
@@ -312,7 +330,7 @@
 
   function setMode(m){
     mode=m; root.classList.toggle('mode-gallery',m==='gallery'); stage.classList.toggle('gallery',m==='gallery'); viewToggle.textContent=m==='gallery'?'Gallery view':'Thumbnails';
-    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();}
+    if(m==='gallery'){stage.scrollTop=0;layoutGallery();paintGallery();rail.style.opacity='1';rail.style.filter='blur(0px)';clearFocus();mbar.style.opacity='1';mbar.style.pointerEvents='';}
     else {preview=null;previewCats(null);layout();schedule();}   /* keep the active filter when returning to the scatter view */
     updateMBar();
     sizePin();
